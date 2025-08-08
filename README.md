@@ -1,2 +1,238 @@
-# Game
-Puzzle game website
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Story Puzzle Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f9;
+        }
+        .container {
+            text-align: center;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+        }
+        h1 {
+            color: #333;
+        }
+        #level {
+            font-size: 20px;
+            color: #4CAF50;
+            margin-bottom: 10px;
+        }
+        p {
+            font-size: 18px;
+            line-height: 1.5;
+            color: #555;
+        }
+        input[type="number"] {
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 16px;
+            width: 100px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            margin: 5px;
+        }
+        #submitBtn {
+            background-color: #4CAF50;
+            color: white;
+        }
+        #submitBtn:hover {
+            background-color: #45a049;
+        }
+        #adBtn {
+            background-color: #FFA500;
+            color: white;
+        }
+        #adBtn:hover {
+            background-color: #e69500;
+        }
+        #message {
+            margin-top: 15px;
+            font-size: 18px;
+            color: #333;
+        }
+        #adSection {
+            margin-top: 20px;
+            padding: 10px;
+            border-top: 1px solid #ccc;
+        }
+        #subscribeCheck {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Story Puzzle Game</h1>
+        <div id="level">Level: 1</div>
+        <p id="question">
+            राम के पिताजी ने अपने बेटे को ₹10 दिए और बोले, "जाओ, बाजार से एक केला लेकर आओ।" 
+            एक केले का दाम ₹6 है। <br>
+            <strong>प्रश्न: राम के पास केला लेने के बाद कितने रुपये बच जाएंगे?</strong>
+        </p>
+        <input type="number" id="answerInput" placeholder="उत्तर डालें">
+        <button id="submitBtn" onclick="checkAnswer()">जवाब दें</button>
+        <p id="message"></p>
+        <div id="adSection">
+            <p>सही उत्तर जानने के लिए विज्ञापन देखें और YouTube चैनल को सब्सक्राइब करें:</p>
+            <button id="adBtn" onclick="watchAd()">विज्ञापन देखें</button>
+            <p id="subscribeCheck" style="display: none;">
+                <input type="checkbox" id="subscribed">
+                <label for="subscribed">मैंने <a href="https://youtube.com/@grpdada?si=-xC6AvVXcGSCHUzt" target="_blank">YouTube चैनल (@grpdada)</a> को सब्सक्राइब कर लिया है।</label>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        let currentLevel = 1;
+        let correctAnswer;
+
+        // Function to generate questions for at least 100 levels
+        function getQuestion(level) {
+            const baseQuestions = [
+                {
+                    text: 'राम के पिताजी ने अपने बेटे को ₹10 दिए और बोले, "जाओ, बाजार से एक केला लेकर आओ।" एक केले का दाम ₹6 है। <br><strong>प्रश्न: राम के पास केला लेने के बाद कितने रुपये बच जाएंगे?</strong>',
+                    answer: 10 - 6 // ₹4
+                },
+                {
+                    text: 'सीता ने बाजार से 2 आम खरीदे। एक आम का दाम ₹15 है। उसके पास ₹50 थे। <br><strong>प्रश्न: सीता के पास कितने रुपये बचेंगे?</strong>',
+                    answer: 50 - (2 * 15) // ₹20
+                },
+                {
+                    text: 'रमेश ने 3 किताबें और 2 पेन खरीदे। एक किताब का दाम ₹25 और एक पेन का दाम ₹10 है। उसके पास ₹100 थे। <br><strong>प्रश्न: रमेश के पास कितने रुपये बचेंगे?</strong>',
+                    answer: 100 - (3 * 25 + 2 * 10) // ₹5
+                },
+                {
+                    text: 'राधा ने 4 केले और 3 संतरे खरीदे। एक केले का दाम ₹6 और एक संतरे का दाम ₹12 है। उसने दुकानदार को ₹100 दिए। <br><strong>प्रश्न: राधा को कितने रुपये वापस मिलेंगे?</strong>',
+                    answer: 100 - (4 * 6 + 3 * 12) // ₹40
+                },
+                {
+                    text: 'अनिल ने 5 सेब, 2 आम और 3 केले खरीदे। एक सेब का दाम ₹8, एक आम का दाम ₹15, और एक केले का दाम ₹6 है। उसके पास ₹100 थे। <br><strong>प्रश्न: अनिल के पास कितने रुपये बचेंगे?</strong>',
+                    answer: 100 - (5 * 8 + 2 * 15 + 3 * 6) // ₹12
+                }
+            ];
+
+            // Generate questions for levels 1 to 100
+            if (level <= 5) {
+                return baseQuestions[level - 1];
+            } else if (level <= 100) {
+                const numItems1 = Math.floor(level / 5) + 2; // Increase items
+                const numItems2 = Math.floor(level / 10) + 1; // Second item type
+                const price1 = 5 + level * 2; // Price of first item
+                const price2 = 10 + level * 3; // Price of second item
+                const totalMoney = 100 + (level - 5) * 20; // Total money
+                const spent = numItems1 * price1 + numItems2 * price2;
+                const remaining = totalMoney - spent;
+                return {
+                    text: `राम ने ${numItems1} सेब और ${numItems2} आम खरीदे। एक सेब का दाम ₹${price1} और एक आम का दाम ₹${price2} है। उसके पास ₹${totalMoney} थे। <br><strong>प्रश्न: राम के पास कितने रुपये बच जाएंगे?</strong>`,
+                    answer: remaining
+                };
+            } else {
+                // Dynamic questions for levels beyond 100
+                const numItems1 = Math.floor(level / 10) + 3; // More items
+                const numItems2 = Math.floor(level / 15) + 2; // More second items
+                const numItems3 = Math.floor(level / 20) + 1; // Third item type
+                const price1 = 10 + level * 4; // Higher price
+                const price2 = 15 + level * 3; // Higher price
+                const price3 = 20 + level * 2; // Higher price
+                const totalMoney = 200 + (level - 100) * 50; // Larger total
+                const spent = numItems1 * price1 + numItems2 * price2 + numItems3 * price3;
+                const remaining = totalMoney - spent;
+                return {
+                    text: `राम ने ${numItems1} सेब, ${numItems2} आम, और ${numItems3} केले खरीदे। एक सेब का दाम ₹${price1}, एक आम का दाम ₹${price2}, और एक केले का दाम ₹${price3} है। उसके पास ₹${totalMoney} थे। <br><strong>प्रश्न: राम के पास कितने रुपये बच जाएंगे?</strong>`,
+                    answer: remaining
+                };
+            }
+        }
+
+        // Load the current question
+        function loadQuestion() {
+            const questionData = getQuestion(currentLevel);
+            correctAnswer = questionData.answer;
+            document.getElementById('question').innerHTML = questionData.text;
+            document.getElementById('level').textContent = `Level: ${currentLevel}`;
+            document.getElementById('message').textContent = '';
+            document.getElementById('answerInput').value = '';
+            document.getElementById('answerInput').disabled = false;
+            document.getElementById('submitBtn').disabled = false;
+            document.getElementById('adBtn').disabled = false;
+            document.getElementById('subscribeCheck').style.display = 'none';
+            document.getElementById('subscribed').checked = false;
+            document.getElementById('answerInput').focus();
+        }
+
+        // Check user's answer
+        function checkAnswer() {
+            const answerInput = document.getElementById('answerInput');
+            const message = document.getElementById('message');
+            const userAnswer = parseInt(answerInput.value);
+
+            if (isNaN(userAnswer)) {
+                message.textContent = "कृपया एक संख्या डालें!";
+                message.style.color = "red";
+                return;
+            }
+
+            if (userAnswer === correctAnswer) {
+                // Show popup for correct answer
+                alert(`बधाई हो! आपका जवाब सही है। अगला स्तर ${currentLevel + 1} लोड हो रहा है!`);
+                message.textContent = "सही जवाब! अगला स्तर लोड हो रहा है...";
+                message.style.color = "green";
+                currentLevel++;
+                setTimeout(loadQuestion, 1000); // Load next question after 1 second
+            } else {
+                message.textContent = `गलत जवाब! फिर से कोशिश करें। (हिंट: कुल रुपये में से खर्च घटाएं)`;
+                message.style.color = "red";
+            }
+
+            answerInput.value = '';
+        }
+
+        // Simulate watching an ad and check subscription
+        function watchAd() {
+            const message = document.getElementById('message');
+            const subscribeCheck = document.getElementById('subscribeCheck');
+            const subscribed = document.getElementById('subscribed');
+
+            // Show subscription checkbox
+            subscribeCheck.style.display = 'block';
+            message.textContent = "विज्ञापन देखा गया! सही उत्तर पाने के लिए YouTube चैनल @grpdada को सब्सक्राइब करें और चेकबॉक्स पर टिक करें।";
+            message.style.color = "blue";
+
+            // Check if user confirms subscription
+            subscribed.addEventListener('change', function () {
+                if (subscribed.checked) {
+                    message.textContent = `सही उत्तर है: ₹${correctAnswer}. अगला स्तर लोड करने के लिए सही उत्तर डालें।`;
+                    message.style.color = "blue";
+                    alert(`सही उत्तर है: ₹${correctAnswer}`);
+                } else {
+                    message.textContent = "उत्तर पाने के लिए चैनल को सब्सक्राइब करें और चेकबॉक्स पर टिक करें।";
+                    message.style.color = "red";
+                }
+            });
+        }
+
+        // Initialize first question
+        loadQuestion();
+    </script>
+</body>
+</html>
